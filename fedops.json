@@ -1,0 +1,11 @@
+{
+    "appName": "ambassador-fullstack",
+    "notifications": {
+      "slack_channels": [
+        "fedops-urgent-default"
+      ]
+    },
+    "deploy_annotations": [
+      "ambassador-fullstack"
+    ]
+  }

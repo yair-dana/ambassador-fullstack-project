@@ -4,6 +4,11 @@ import { hot } from '@wix/bootstrap-hot-loader';
 import wixExpressCsrf from '@wix/wix-express-csrf';
 import wixExpressRequireHttps from '@wix/wix-express-require-https';
 import * as WixNodeI18nCache from '@wix/wix-node-i18n-cache';
+import { addComments, fetchComments } from './services/comments-service';
+import {
+  Comment,
+  NodeWorkshopScalaApp,
+} from '@wix/ambassador-node-workshop-scala-app/rpc';
 
 // caches translation files and serves them per request
 // https://github.com/wix-private/wix-node-i18n-cache
@@ -39,6 +44,57 @@ export default hot(module, (app: Router, context) => {
 
     // Send a response back to the client.
     res.renderView('./index.ejs', renderModel);
+  });
+
+  app.get('/comments', async (req, res) => {
+    const siteId = req.query.siteId;
+
+    if (!siteId) {
+      res.status(404).send({ error: 'site ID not found' });
+      return;
+    }
+    if (typeof siteId !== 'string') {
+      res.status(500).send({ error: 'Invalid site ID' });
+      return;
+    }
+
+    try {
+      const aspects = req.aspects;
+      const commentsList = await fetchComments(aspects, siteId);
+      res.send(commentsList);
+    } catch (err) {
+      res.status(500).send({ error: err.toString() });
+    }
+  });
+
+  app.post('/comments/:siteId', async (req, res) => {
+    const siteId = req.params.siteId;
+    const text = req.query.text;
+    const author = req.query.author;
+
+    if (!siteId || !text || !author) {
+      res
+        .status(404)
+        .send({ error: 'missing parameters- siteID | text | author' });
+      return;
+    }
+    if (
+      typeof siteId !== 'string' ||
+      typeof text !== 'string' ||
+      typeof author !== 'string'
+    ) {
+      res.status(500).send({ error: 'Invalid params' });
+      return;
+    }
+
+    try {
+      const aspects = req.aspects;
+      const comment: Comment = { author, text };
+      await addComments(aspects, siteId, comment);
+      res.send('Add a new comment successfully!');
+    } catch (err) {
+      res.status(500).send({ error: err.toString() });
+    }
   });
 
   function getRenderModel(req: Request) {

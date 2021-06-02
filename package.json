@@ -23,6 +23,8 @@
     "*.{js,ts,tsx}": "yoshi lint"
   },
   "dependencies": {
+    "@wix/ambassador": "^4.0.521",
+    "@wix/ambassador-node-workshop-scala-app": "^1.0.12",
     "@wix/bootstrap-hot-loader": "^5.0.0",
     "@wix/wix-axios-config": "latest",
     "@wix/wix-bootstrap-greyhound": "latest",
@@ -45,6 +47,7 @@
     "@types/node": "^14.0.0",
     "@types/react": "^16.7.20",
     "@types/react-dom": "^16.0.11",
+    "@wix/ambassador-testkit": "^5.0.339",
     "@wix/fedops-logger": "^5.0.0",
     "@wix/jest-yoshi-preset": "^5.0.0",
     "@wix/wix-bootstrap-testkit": "latest",

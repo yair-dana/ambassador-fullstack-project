@@ -20,21 +20,22 @@ import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import * as events from 'events';
 import s from './App.scss';
 import { CommentToString } from '../../utils';
+import CommentForm from '../CommentForm/CommentForm';
 
 function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
     undefined,
   );
   const [siteId, setSiteId] = useState<string>('');
-  const [commentAuthor, setCommentAuthor] = useState<string>('');
-  const [commentText, setCommentText] = useState<string>('');
+  const [author, setAuthor] = useState<string>('');
+  const [text, setText] = useState<string>('');
   const [isSiteIdValid, setIsSiteIdValid] = useState<boolean>(false);
   const [isValidComment, SetIsValidComment] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   const addComment = async (e: any) => {
     e.preventDefault();
-    const body = { author: commentAuthor, text: commentText };
+    const body = { author, text };
     try {
       const ret = await axios.post(`/comments/${siteId}`, body);
       clearCommentForm();
@@ -44,8 +45,8 @@ function App() {
   };
 
   const clearCommentForm = () => {
-    setCommentAuthor('');
-    setCommentText('');
+    setAuthor('');
+    setText('');
     setErrorMsg('');
   };
 
@@ -57,7 +58,7 @@ function App() {
         setCommentList(comments.data);
         setErrorMsg('');
       }
-    } catch (e) {
+    } catch (err) {
       setErrorMsg('Error: Could Not Fetch Comments');
     }
   };
@@ -68,21 +69,21 @@ function App() {
   ];
 
   const HandleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCommentText(event.target.value);
+    setText(event.target.value);
   };
 
   const HandleAuthorChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCommentAuthor(event.target.value);
+    setAuthor(event.target.value);
   };
 
   useEffect(() => {
     setIsSiteIdValid(siteId.trim().length !== 0);
     SetIsValidComment(
-      commentText.trim().length !== 0 &&
-        commentAuthor.trim().length !== 0 &&
+      text.trim().length !== 0 &&
+        author.trim().length !== 0 &&
         siteId.trim().length !== 0,
     );
-  }, [siteId, commentText, commentAuthor]);
+  }, [siteId, text, author]);
 
   return (
     <WixStyleReactProvider features={{ reducedSpacingAndImprovedLayout: true }}>
@@ -112,33 +113,14 @@ function App() {
 
             <Layout>
               <Cell span={6}>
-                <Card>
-                  <Card.Header title="Add Comment" />
-                  <Card.Divider />
-                  <Card.Content>
-                    <Layout>
-                      <Cell span={6}>
-                        <FormField label="Author" required>
-                          <Input
-                            dataHook={DataHooks.AUTHOR}
-                            value={commentAuthor}
-                            onChange={HandleAuthorChange}
-                          />
-                        </FormField>
-                      </Cell>
-                      <Cell span={6}>
-                        <FormField label="Text" required>
-                          <Input
-                            dataHook={DataHooks.TEXT}
-                            value={commentText}
-                            onChange={HandleTextChange}
-                          />
-                        </FormField>
-                      </Cell>
-                    </Layout>
-                  </Card.Content>
-                </Card>
+                <CommentForm
+                  author={author}
+                  text={text}
+                  onAuthorChange={HandleAuthorChange}
+                  onTextChange={HandleTextChange}
+                />
               </Cell>
+
               <Cell span={6}>
                 <Card>
                   <Card.Header title="Comments List" />

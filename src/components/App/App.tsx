@@ -1,25 +1,21 @@
+import axios from 'axios';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Page,
   WixStyleReactProvider,
   Breadcrumbs,
-  Text,
-  Card,
-  Box,
   Cell,
-  Input,
   Layout,
   FontUpgrade,
-  FormField,
 } from 'wix-style-react';
 import DataHooks from '../../DataHooks';
-import ActiveBar from '../ActiveBar/ActiveBar';
-import axios from 'axios';
 import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
+import * as status from '../StatusMessage/requestStatus';
+import { isEmpty } from '../../utils';
+import ActiveBar from '../ActiveBar/ActiveBar';
 import CommentForm from '../CommentForm/CommentForm';
 import CommentsList from '../CommentsList/CommentsList';
-import * as status from '../StatusMessage/requestStatus';
 import SiteIDCard from '../SiteIDCard/SiteIDCard';
 import StatusMessage from '../StatusMessage/StatusMessage';
 
@@ -27,7 +23,6 @@ function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
     undefined,
   );
-
   const [siteId, setSiteId] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
   const [text, setText] = useState<string>('');
@@ -39,14 +34,14 @@ function App() {
 
   const addComment = async (e: any) => {
     e.preventDefault();
+    const body = { author, text };
     setRequestStatus(status.LoadingStatus);
 
-    const body = { author, text };
     try {
       await axios.post(`/comments/${siteId}`, body);
       clearCommentForm();
       setRequestStatus(status.SuccessStatus('Add A New Comment Successfully'));
-    } catch (e) {
+    } catch (err) {
       setRequestStatus(status.ErrorStatus('Could Not Add Comment'));
     }
   };
@@ -54,14 +49,11 @@ function App() {
   const fetchComments = async (e: any) => {
     e.preventDefault();
     setRequestStatus(status.LoadingStatus);
+
     try {
       const comments = await axios.get(`/comments?siteId=${siteId}`);
       setRequestStatus(status.SuccessStatus('Fetch Comments Successfully'));
-      if (comments.data !== '') {
-        setCommentList(comments.data);
-      } else {
-        setCommentList(undefined);
-      }
+      setCommentList(comments.data !== '' ? comments.data : undefined);
     } catch (err) {
       setCommentList(undefined);
       setRequestStatus(status.ErrorStatus('Could Not Fetch Comments'));
@@ -73,6 +65,7 @@ function App() {
     setText('');
     setRequestStatus(status.InitStatus);
   };
+
   const breadcrumbItems: BreadcrumbsItem[] = [
     { id: 1, value: 'Root Page' },
     { id: 2, value: 'Comments App' },
@@ -91,12 +84,8 @@ function App() {
   };
 
   useEffect(() => {
-    setIsSiteIdValid(siteId.trim().length !== 0);
-    SetIsValidComment(
-      text.trim().length !== 0 &&
-        author.trim().length !== 0 &&
-        siteId.trim().length !== 0,
-    );
+    setIsSiteIdValid(!isEmpty(siteId));
+    SetIsValidComment(!isEmpty(text) && !isEmpty(author) && !isEmpty(siteId));
   }, [siteId, text, author]);
 
   return (

@@ -27,7 +27,7 @@ describe('API integration tests', () => {
     };
     const url = app.getUrl(`/comments/siteId=${siteId}`);
     const response = await axios.post(url, body);
-    expect(response.data).toEqual('Add a new comment successfully!');
+    expect(response.data.msg).toEqual('Add a new comment successfully!');
   });
 });
 
@@ -41,7 +41,7 @@ function getCommentsDummyData() {
   const siteId = '1234';
   const commentsList: Comment[] = [
     { author: 'Yair', text: 'example text' },
-    { author: 'ben', text: 'example comment' },
+    { author: 'Ben', text: 'example comment' },
   ];
   return { siteId, commentsList };
 }

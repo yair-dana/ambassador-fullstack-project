@@ -158,4 +158,80 @@ describe('App', () => {
     expect(await inputAuthor.getText()).toEqual('');
     expect(await inputText.getText()).toEqual('');
   });
+
+  it('should display error msg when user enter invalid site id and enter add comment', async () => {
+    const { baseElement } = render(<App />);
+
+    const url = `/comments/${dummyInvalidSiteId}`;
+    axiosMock.onPost(url).reply(404, dummyComment);
+
+    const inputText = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.TEXT,
+    });
+    const inputAuthor = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.AUTHOR,
+    });
+    const addCommentButton = await ButtonTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.ADD_COMMENT,
+    });
+
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
+    const textErrorMessage = await TextTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.ERROR_MESSAGE,
+    });
+
+    await inputAuthor.enterText('Author Test');
+    await inputText.enterText('Text Test');
+    await inputSiteId.enterText(dummyInvalidSiteId);
+
+    expect(await textErrorMessage.getText()).toEqual('');
+    await act(async () => {
+      await addCommentButton.click();
+    });
+
+    expect(await textErrorMessage.getText()).toEqual(
+      'Error: Could Not Add Comments',
+    );
+  });
+
+  it('should display error msg when user enter invalid site id and enter fetch comments', async () => {
+    const { baseElement } = render(<App />);
+
+    const url = `/comments?siteId=${dummyInvalidSiteId}`;
+    axiosMock.onPost(url).reply(404, dummyComment);
+
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
+    const textErrorMessage = await TextTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.ERROR_MESSAGE,
+    });
+
+    const fetchButton = await ButtonTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.FETCH_COMMENTS,
+    });
+
+    await inputSiteId.enterText(dummyInvalidSiteId);
+
+    expect(await textErrorMessage.getText()).toEqual('');
+    await act(async () => {
+      await fetchButton.click();
+    });
+
+    expect(await textErrorMessage.getText()).toEqual(
+      'Error: Could Not Fetch Comments',
+    );
+  });
 });

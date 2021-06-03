@@ -1,6 +1,9 @@
 const { bootstrapServer, emitConfigs } = require('./environment');
 
-import { AmbassadorTestkit } from '@wix/ambassador-testkit';
+import {
+  AmbassadorTestkit,
+  InvalidArgumentError,
+} from '@wix/ambassador-testkit';
 import { NodeWorkshopScalaApp } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import {
   dummyComment,
@@ -32,13 +35,13 @@ import {
     .createStub(NodeWorkshopScalaApp)
     .CommentsService()
     .fetch.when(dummyInvalidSiteId)
-    .reject('Invalid Site ID');
+    .reject(InvalidArgumentError('Invalid Site ID'));
 
   ambassadorTestkit
     .createStub(NodeWorkshopScalaApp)
     .CommentsService()
     .add.when(dummyInvalidSiteId, dummyComment)
-    .reject('Invalid Site ID');
+    .reject(InvalidArgumentError('Invalid Site ID'));
 
   await ambassadorTestkit.start();
   /** End RPC Mocks **/

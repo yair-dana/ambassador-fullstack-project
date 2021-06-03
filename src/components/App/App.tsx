@@ -18,6 +18,7 @@ import axios from 'axios';
 import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import * as events from 'events';
+import s from './App.scss';
 import { CommentToString } from '../../utils';
 
 function App() {
@@ -29,30 +30,35 @@ function App() {
   const [commentText, setCommentText] = useState<string>('');
   const [isSiteIdValid, setIsSiteIdValid] = useState<boolean>(false);
   const [isValidComment, SetIsValidComment] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   const addComment = async (e: any) => {
     e.preventDefault();
     const body = { author: commentAuthor, text: commentText };
-    const ret = await axios.post(`/comments/${siteId}`, body);
-    console.log(ret.status);
-    if (ret.status === 200) {
+    try {
+      const ret = await axios.post(`/comments/${siteId}`, body);
       clearCommentForm();
+    } catch (e) {
+      setErrorMsg('Error: Could Not Add Comments');
     }
   };
 
   const clearCommentForm = () => {
     setCommentAuthor('');
     setCommentText('');
+    setErrorMsg('');
   };
 
   const fetchComments = async (e: any) => {
     e.preventDefault();
-    const comments = await axios.get(`/comments?siteId=${siteId}`);
-
-    if (comments.status === 200 && comments.data !== '') {
-      setCommentList(comments.data);
-    } else {
-      setCommentList(undefined);
+    try {
+      const comments = await axios.get(`/comments?siteId=${siteId}`);
+      if (comments.data !== '') {
+        setCommentList(comments.data);
+        setErrorMsg('');
+      }
+    } catch (e) {
+      setErrorMsg('Error: Could Not Fetch Comments');
     }
   };
 
@@ -96,6 +102,14 @@ function App() {
             }
           />
           <Page.Content>
+            <Text
+              skin="error"
+              textAlign="center"
+              dataHook={DataHooks.ERROR_MESSAGE}
+            >
+              {errorMsg}
+            </Text>
+
             <Layout>
               <Cell span={6}>
                 <Card>

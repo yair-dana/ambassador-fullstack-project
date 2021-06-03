@@ -94,8 +94,8 @@ export default hot(module, (app: Router, context) => {
         author: author as string,
         text: text as string,
       };
-      await addComments(aspects, siteId, comment);
-      res.send('Add a new comment successfully!');
+      const ret = await addComments(aspects, siteId, comment);
+      res.send({ msg: 'Add a new comment successfully!', data: ret });
     } catch (err) {
       res.status(500).send({ error: err.toString() });
     }

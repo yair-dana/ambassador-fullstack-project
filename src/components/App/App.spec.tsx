@@ -7,10 +7,8 @@ import { CommentToString } from '../../utils';
 import RTLAppDriver from './AppDriver';
 
 import {
-  dummyValidSiteId,
   dummyCommentList,
   dummyComment,
-  dummyInvalidSiteId,
 } from '../../../__tests__/dummy-data-test';
 
 import axios from 'axios';
@@ -31,10 +29,10 @@ describe('App', () => {
   });
 
   it('should render comments when user enter valid site id and click fetch', async () => {
-    const url = `/comments?siteId=${dummyValidSiteId}`;
+    const url = `/comments?siteId=site-valid-id`;
     axiosMock.onGet(url).reply(200, dummyCommentList);
 
-    await driver.when.enterSiteId(dummyValidSiteId);
+    await driver.when.enterSiteId('site-valid-id');
 
     await act(async () => {
       await driver.when.fetchButtonClick();
@@ -49,7 +47,7 @@ describe('App', () => {
     await driver.when.enterSiteId('');
     expect(await driver.is.fetchButtonDisable()).toEqual(true);
 
-    await driver.when.enterSiteId(dummyValidSiteId);
+    await driver.when.enterSiteId('site-valid-id');
     expect(await driver.is.fetchButtonDisable()).toEqual(false);
   });
 
@@ -58,18 +56,18 @@ describe('App', () => {
 
     await driver.when.enterCommentText('Text Test');
     await driver.when.enterCommentAuthor('Author Test');
-    await driver.when.enterSiteId(dummyValidSiteId);
+    await driver.when.enterSiteId('site-valid-id');
 
     expect(await driver.is.addButtonDisable()).toEqual(false);
   });
 
   it('should clear comment form Add Comment success', async () => {
-    const url = `/comments/${dummyValidSiteId}`;
+    const url = `/comments/site-valid-id`;
     axiosMock.onPost(url).reply(200, dummyComment);
 
     await driver.when.enterCommentText('Text Test');
     await driver.when.enterCommentAuthor('Author Test');
-    await driver.when.enterSiteId(dummyValidSiteId);
+    await driver.when.enterSiteId('site-valid-id');
 
     await act(async () => {
       await driver.when.addButtonClick();
@@ -80,39 +78,69 @@ describe('App', () => {
   });
 
   it('should display error msg when user enter invalid site id and enter add comment', async () => {
-    const url = `/comments/${dummyInvalidSiteId}`;
+    const url = `/comments/site-invalid-id`;
     axiosMock.onPost(url).reply(404, dummyComment);
 
     await driver.when.enterCommentText('Text Test');
     await driver.when.enterCommentAuthor('Author Test');
-    await driver.when.enterSiteId(dummyInvalidSiteId);
+    await driver.when.enterSiteId('site-invalid-id');
 
-    expect(await driver.get.errorMessageText()).toEqual('');
+    expect(await driver.get.statusMessageText()).toEqual('');
 
     await act(async () => {
       await driver.when.addButtonClick();
     });
 
-    expect(await driver.get.errorMessageText()).toEqual(
-      'Error: Could Not Add Comments',
+    expect(await driver.get.statusMessageText()).toEqual(
+      'Error: Could Not Add Comment',
     );
   });
 
   it('should display error msg when user enter invalid site id and enter fetch comments', async () => {
-    const { baseElement } = render(<App />);
-
-    const url = `/comments?siteId=${dummyInvalidSiteId}`;
+    const url = `/comments?siteId=site-invalid-id`;
     axiosMock.onPost(url).reply(404, dummyComment);
 
-    await driver.when.enterSiteId(dummyInvalidSiteId);
+    await driver.when.enterSiteId('site-invalid-id');
 
-    expect(await driver.get.errorMessageText()).toEqual('');
+    expect(await driver.get.statusMessageText()).toEqual('');
     await act(async () => {
       await driver.when.fetchButtonClick();
     });
 
-    expect(await driver.get.errorMessageText()).toEqual(
+    expect(await driver.get.statusMessageText()).toEqual(
       'Error: Could Not Fetch Comments',
+    );
+  });
+
+  it('should display success message when comments loaded', async () => {
+    const url = `/comments?siteId=site-valid-id`;
+    axiosMock.onGet(url).reply(200, dummyCommentList);
+
+    await driver.when.enterSiteId('site-valid-id');
+
+    await act(async () => {
+      await driver.when.fetchButtonClick();
+    });
+
+    expect(await driver.get.statusMessageText()).toEqual(
+      'Fetch Comments Successfully',
+    );
+  });
+
+  it('should display success message when user add comment successfully', async () => {
+    const url = `/comments/site-valid-id`;
+    axiosMock.onPost(url).reply(200, dummyComment);
+
+    await driver.when.enterCommentText('Text Test');
+    await driver.when.enterCommentAuthor('Author Test');
+    await driver.when.enterSiteId('site-valid-id');
+
+    await act(async () => {
+      await driver.when.addButtonClick();
+    });
+
+    expect(await driver.get.statusMessageText()).toEqual(
+      'Add A New Comment Successfully',
     );
   });
 });

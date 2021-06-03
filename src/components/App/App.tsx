@@ -19,6 +19,7 @@ import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import CommentForm from '../CommentForm/CommentForm';
 import CommentsList from '../CommentsList/CommentsList';
+import * as status from '../../requestStatus';
 
 function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
@@ -29,40 +30,45 @@ function App() {
   const [text, setText] = useState<string>('');
   const [isSiteIdValid, setIsSiteIdValid] = useState<boolean>(false);
   const [isValidComment, SetIsValidComment] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [requestStatus, setRequestStatus] = useState<status.statusType>(
+    status.InitStatus,
+  );
 
   const addComment = async (e: any) => {
     e.preventDefault();
+    setRequestStatus(status.LoadingStatus);
+
     const body = { author, text };
     try {
-      const ret = await axios.post(`/comments/${siteId}`, body);
+      await axios.post(`/comments/${siteId}`, body);
       clearCommentForm();
+      setRequestStatus(status.SuccessStatus('Add A New Comment Successfully'));
     } catch (e) {
-      setErrorMsg('Error: Could Not Add Comments');
+      setRequestStatus(status.ErrorStatus('Could Not Add Comment'));
     }
   };
 
   const fetchComments = async (e: any) => {
     e.preventDefault();
+    setRequestStatus(status.LoadingStatus);
     try {
       const comments = await axios.get(`/comments?siteId=${siteId}`);
-      console.log(comments);
+      setRequestStatus(status.SuccessStatus('Fetch Comments Successfully'));
       if (comments.data !== '') {
         setCommentList(comments.data);
-        setErrorMsg('');
       } else {
         setCommentList(undefined);
       }
     } catch (err) {
       setCommentList(undefined);
-      setErrorMsg('Error: Could Not Fetch Comments');
+      setRequestStatus(status.ErrorStatus('Could Not Fetch Comments'));
     }
   };
 
   const clearCommentForm = () => {
     setAuthor('');
     setText('');
-    setErrorMsg('');
+    setRequestStatus(status.InitStatus);
   };
   const breadcrumbItems: BreadcrumbsItem[] = [
     { id: 1, value: 'Root Page' },
@@ -109,13 +115,12 @@ function App() {
           />
           <Page.Content>
             <Text
-              skin="error"
+              skin={requestStatus.skin}
               textAlign="center"
               dataHook={DataHooks.ERROR_MESSAGE}
             >
-              {errorMsg}
+              {requestStatus.msg}
             </Text>
-
             <Layout>
               <Cell>
                 <Card>

@@ -58,7 +58,7 @@ class RTLAppDriver {
       });
       return inputAuthor.getText();
     },
-    errorMessageText: async () => {
+    statusMessageText: async () => {
       const textErrorMessage = await TextTestkit({
         wrapper: this.baseElement,
         dataHook: DataHooks.ERROR_MESSAGE,

@@ -17,9 +17,6 @@ import ActiveBar from '../ActiveBar/ActiveBar';
 import axios from 'axios';
 import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
-import * as events from 'events';
-import s from './App.scss';
-import { CommentToString } from '../../utils';
 import CommentForm from '../CommentForm/CommentForm';
 import CommentsList from '../CommentsList/CommentsList';
 
@@ -45,25 +42,28 @@ function App() {
     }
   };
 
+  const fetchComments = async (e: any) => {
+    e.preventDefault();
+    try {
+      const comments = await axios.get(`/comments?siteId=${siteId}`);
+      console.log(comments);
+      if (comments.data !== '') {
+        setCommentList(comments.data);
+        setErrorMsg('');
+      } else {
+        setCommentList(undefined);
+      }
+    } catch (err) {
+      setCommentList(undefined);
+      setErrorMsg('Error: Could Not Fetch Comments');
+    }
+  };
+
   const clearCommentForm = () => {
     setAuthor('');
     setText('');
     setErrorMsg('');
   };
-
-  const fetchComments = async (e: any) => {
-    e.preventDefault();
-    try {
-      const comments = await axios.get(`/comments?siteId=${siteId}`);
-      if (comments.data !== '') {
-        setCommentList(comments.data);
-        setErrorMsg('');
-      }
-    } catch (err) {
-      setErrorMsg('Error: Could Not Fetch Comments');
-    }
-  };
-
   const breadcrumbItems: BreadcrumbsItem[] = [
     { id: 1, value: 'Root Page' },
     { id: 2, value: 'Comments App' },
@@ -115,7 +115,21 @@ function App() {
             >
               {errorMsg}
             </Text>
+
             <Layout>
+              <Cell>
+                <Card>
+                  <Card.Content>
+                    <FormField label="Please Provide Your Site ID" required>
+                      <Input
+                        value={siteId}
+                        onChange={HandleSiteIDChane}
+                        dataHook={DataHooks.SITE_ID}
+                      />
+                    </FormField>
+                  </Card.Content>
+                </Card>
+              </Cell>
               <Cell span={6}>
                 <CommentForm
                   author={author}
@@ -125,11 +139,7 @@ function App() {
                 />
               </Cell>
               <Cell span={6}>
-                <CommentsList
-                  siteID={siteId}
-                  comments={commentsList}
-                  onSiteIdChange={HandleSiteIDChane}
-                />
+                <CommentsList comments={commentsList} />
               </Cell>
             </Layout>
           </Page.Content>

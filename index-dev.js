@@ -22,26 +22,26 @@ import {
     .createStub(NodeWorkshopScalaApp)
     .CommentsService()
     .fetch.when(dummyValidSiteId)
-    .resolve(dummyCommentList);
+    .resolve(dummyCommentList)
+    .when(dummyInvalidSiteId)
+    .reject(InvalidArgumentError('Invalid Site ID'));
 
   ambassadorTestkit
     .createStub(NodeWorkshopScalaApp)
     .CommentsService()
     .add.when(dummyValidSiteId, dummyComment)
-    .resolve(dummyComment);
+    .resolve(dummyComment)
+    .when(dummyInvalidSiteId, dummyComment)
+    .reject(InvalidArgumentError('Invalid Site ID'));
 
   /** Invalid site id - Negative Scenarios test **/
-  ambassadorTestkit
-    .createStub(NodeWorkshopScalaApp)
-    .CommentsService()
-    .fetch.when(dummyInvalidSiteId)
-    .reject(InvalidArgumentError('Invalid Site ID'));
+  // ambassadorTestkit
+  //   .createStub(NodeWorkshopScalaApp)
+  //   .CommentsService()
+  //   .fetch.when(dummyInvalidSiteId)
+  //   .reject(InvalidArgumentError('Invalid Site ID'));
 
-  ambassadorTestkit
-    .createStub(NodeWorkshopScalaApp)
-    .CommentsService()
-    .add.when(dummyInvalidSiteId, dummyComment)
-    .reject(InvalidArgumentError('Invalid Site ID'));
+  // ambassadorTestkit.createStub(NodeWorkshopScalaApp).CommentsService().add;
 
   await ambassadorTestkit.start();
   /** End RPC Mocks **/

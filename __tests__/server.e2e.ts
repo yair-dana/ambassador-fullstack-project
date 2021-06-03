@@ -21,10 +21,12 @@ describe('API integration tests', () => {
   it('should post a new comment', async () => {
     const { siteId, comment } = postCommentDummyData();
     createStubAddComment(ambassadorTestkit, siteId, comment);
-    const url = app.getUrl(
-      `/comments/siteId=${siteId}?author=${comment.author}&text=${comment.text}`,
-    );
-    const response = await axios.post(url);
+    const body = {
+      author: comment.author,
+      text: comment.text,
+    };
+    const url = app.getUrl(`/comments/siteId=${siteId}`);
+    const response = await axios.post(url, body);
     expect(response.data).toEqual('Add a new comment successfully!');
   });
 });

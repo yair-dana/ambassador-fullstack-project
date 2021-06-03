@@ -25,7 +25,7 @@ describe('API integration tests', () => {
       author: comment.author,
       text: comment.text,
     };
-    const url = app.getUrl(`/comments/siteId=${siteId}`);
+    const url = app.getUrl(`/comments/${siteId}`);
     const response = await axios.post(url, body);
     expect(response.data.msg).toEqual('Add a new comment successfully!');
   });

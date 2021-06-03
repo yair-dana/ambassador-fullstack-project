@@ -1,14 +1,13 @@
 import * as path from 'path';
 import { Router, Request } from 'express';
+import * as bodyParser from 'body-parser';
+
 import { hot } from '@wix/bootstrap-hot-loader';
 import wixExpressCsrf from '@wix/wix-express-csrf';
 import wixExpressRequireHttps from '@wix/wix-express-require-https';
 import * as WixNodeI18nCache from '@wix/wix-node-i18n-cache';
 import { addComments, fetchComments } from './services/comments-service';
-import {
-  Comment,
-  NodeWorkshopScalaApp,
-} from '@wix/ambassador-node-workshop-scala-app/rpc';
+import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 
 // caches translation files and serves them per request
 // https://github.com/wix-private/wix-node-i18n-cache
@@ -24,6 +23,8 @@ const localI18NCache = new WixNodeI18nCache({
 export default hot(module, (app: Router, context) => {
   // We load the already parsed ERB configuration (located at /templates folder).
   const config = context.config.load('ambassador-fullstack');
+
+  app.use(bodyParser.json({ limit: '200kb' }));
 
   // Attach CSRF protection middleware. See
   // https://github.com/wix-platform/wix-node-platform/tree/master/express/wix-express-csrf.
@@ -69,8 +70,8 @@ export default hot(module, (app: Router, context) => {
 
   app.post('/comments/:siteId', async (req, res) => {
     const siteId = req.params.siteId;
-    const text = req.query.text;
-    const author = req.query.author;
+    const text = req.body.text;
+    const author = req.body.author;
 
     if (!siteId || !text || !author) {
       res
@@ -89,7 +90,10 @@ export default hot(module, (app: Router, context) => {
 
     try {
       const aspects = req.aspects;
-      const comment: Comment = { author, text };
+      const comment: Comment = {
+        author: author as string,
+        text: text as string,
+      };
       await addComments(aspects, siteId, comment);
       res.send('Add a new comment successfully!');
     } catch (err) {

@@ -41,6 +41,7 @@
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "source-map-support": "^0.5.11",
+    "validator": "^13.6.0",
     "wix-style-react": "^9.120.0"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 export type statusType = {
   msg: string;
-  skin:
+  status:
     | 'error'
     | 'disabled'
     | 'standard'
@@ -12,13 +12,13 @@ export type statusType = {
 
 export const InitStatus: statusType = {
   msg: '',
-  skin: undefined,
+  status: undefined,
 };
 
 export const ErrorStatus = (errorMsg: string) => {
   const newStatus: statusType = {
     msg: `Error: ${errorMsg}`,
-    skin: 'error',
+    status: 'error',
   };
   return newStatus;
 };
@@ -26,12 +26,12 @@ export const ErrorStatus = (errorMsg: string) => {
 export const SuccessStatus = (successMsg: string) => {
   const newStatus: statusType = {
     msg: `${successMsg}`,
-    skin: 'success',
+    status: 'success',
   };
   return newStatus;
 };
 
 export const LoadingStatus: statusType = {
   msg: 'Loading...',
-  skin: 'primary',
+  status: 'primary',
 };

@@ -1,3 +1,5 @@
+import React from 'react';
+import DataHooks from '../../DataHooks';
 import {
   Card,
   Cell,
@@ -8,8 +10,6 @@ import {
   Layout,
   Text,
 } from 'wix-style-react';
-import DataHooks from '../../DataHooks';
-import React from 'react';
 import { CommentToString } from '../../utils';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import { statusType } from '../StatusMessage/requestStatus';
@@ -21,7 +21,7 @@ type CommentsListProps = {
 
 export default function CommentsList(props: CommentsListProps) {
   const showNoResultMessage: boolean =
-    props.comments === undefined && props.status.skin === 'success';
+    props.comments === undefined && props.status.status === 'success';
 
   const showComments: boolean = props.comments !== undefined;
 

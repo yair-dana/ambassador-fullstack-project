@@ -4,4 +4,6 @@ export default {
   FETCH_COMMENTS: 'fetch-button',
   COMMENT: 'comment-data',
   SITE_ID: 'site-id-input',
+  AUTHOR: 'author-input',
+  TEXT: 'text-input',
 };

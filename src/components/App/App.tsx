@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Page,
   WixStyleReactProvider,
@@ -50,9 +50,20 @@ function App() {
     { id: 2, value: 'Comments App' },
   ];
 
+  const HandleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCommentText(event.target.value);
+  };
+
+  const HandleAuthorChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCommentAuthor(event.target.value);
+  };
+
   useEffect(() => {
     setIsSiteIdValid(siteId.trim().length !== 0);
-  }, [siteId]);
+    SetIsValidComment(
+      commentText.trim().length !== 0 && commentAuthor.trim().length !== 0,
+    );
+  }, [siteId, commentText, commentAuthor]);
 
   return (
     <WixStyleReactProvider features={{ reducedSpacingAndImprovedLayout: true }}>
@@ -64,7 +75,8 @@ function App() {
             breadcrumbs={<Breadcrumbs items={breadcrumbItems} activeId={2} />}
             actionsBar={
               <ActiveBar
-                isFetchEnable={isSiteIdValid}
+                isFetchCommentsEnable={isSiteIdValid}
+                isAddCommentEnable={isValidComment}
                 onAddComment={addComment}
                 onFetchComments={fetchComments}
               />
@@ -80,12 +92,20 @@ function App() {
                     <Layout>
                       <Cell span={6}>
                         <FormField label="Author" required>
-                          <Input />
+                          <Input
+                            dataHook={DataHooks.AUTHOR}
+                            value={commentAuthor}
+                            onChange={HandleAuthorChange}
+                          />
                         </FormField>
                       </Cell>
                       <Cell span={6}>
                         <FormField label="Text" required>
-                          <Input />
+                          <Input
+                            dataHook={DataHooks.TEXT}
+                            value={commentText}
+                            onChange={HandleTextChange}
+                          />
                         </FormField>
                       </Cell>
                     </Layout>

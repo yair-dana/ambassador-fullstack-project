@@ -10,6 +10,7 @@ function ActiveBar(props: any) {
           priority="secondary"
           onClick={props.onAddComment}
           dataHook={DataHooks.ADD_COMMENT}
+          disabled={!props.isAddCommentEnable}
         >
           Add Comment
         </Button>
@@ -18,7 +19,7 @@ function ActiveBar(props: any) {
         <Button
           dataHook={DataHooks.FETCH_COMMENTS}
           onClick={props.onFetchComments}
-          disabled={!props.isFetchEnable}
+          disabled={!props.isFetchCommentsEnable}
         >
           Fetch Comments
         </Button>

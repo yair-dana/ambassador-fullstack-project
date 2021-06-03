@@ -89,4 +89,30 @@ describe('App', () => {
     await inputSiteId.enterText('1234');
     expect(await fetchButton.isButtonDisabled()).toEqual(false);
   });
+
+  it('should allow user click Add comment only if required field entered', async () => {
+    const { baseElement } = render(<App />);
+
+    const addCommentButton = await ButtonTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.ADD_COMMENT,
+    });
+
+    expect(await addCommentButton.isButtonDisabled()).toEqual(true);
+
+    const inputAuthor = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.AUTHOR,
+    });
+
+    const inputText = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.TEXT,
+    });
+
+    await inputAuthor.enterText('Author Test');
+    await inputText.enterText('Text Test');
+
+    expect(await addCommentButton.isButtonDisabled()).toEqual(false);
+  });
 });

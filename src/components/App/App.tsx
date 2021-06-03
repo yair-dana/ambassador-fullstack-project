@@ -32,6 +32,17 @@ function App() {
 
   const addComment = async (e: any) => {
     e.preventDefault();
+    const body = { author: commentAuthor, text: commentText };
+    const ret = await axios.post(`/comments/${siteId}`, body);
+    console.log(ret.status);
+    if (ret.status === 200) {
+      clearCommentForm();
+    }
+  };
+
+  const clearCommentForm = () => {
+    setCommentAuthor('');
+    setCommentText('');
   };
 
   const fetchComments = async (e: any) => {
@@ -61,7 +72,9 @@ function App() {
   useEffect(() => {
     setIsSiteIdValid(siteId.trim().length !== 0);
     SetIsValidComment(
-      commentText.trim().length !== 0 && commentAuthor.trim().length !== 0,
+      commentText.trim().length !== 0 &&
+        commentAuthor.trim().length !== 0 &&
+        siteId.trim().length !== 0,
     );
   }, [siteId, commentText, commentAuthor]);
 

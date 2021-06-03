@@ -10,14 +10,14 @@ import {
 import DataHooks from '../../DataHooks';
 import { act } from 'react-dom/test-utils';
 
-import { baseUrl } from '@wix/ambassador-testkit/dist/test/fixtures/html-app/config';
 import { CommentToString } from '../../utils';
 
-const dummyCommentList = [
-  { author: 'author1', text: 'dummy comment' },
-  { author: 'author2', text: 'dummy comment' },
-  { author: 'author3', text: 'dummy comment' },
-];
+import {
+  dummyValidSiteId,
+  dummyCommentList,
+  dummyComment,
+  dummyInvalidSiteId,
+} from '../../../__tests__/dummy-data-test';
 
 import axios from 'axios';
 
@@ -37,11 +37,10 @@ describe('App', () => {
     expect(await title.titleText()).toEqual('Comments App');
   });
 
-  it('should render comments when user click fetch', async () => {
+  it('should render comments when user enter valid site id and click fetch', async () => {
     const { baseElement } = render(<App />);
 
-    const commentsUri = '/comments';
-    const url = new RegExp(`${commentsUri}*`);
+    const url = `/comments?siteId=${dummyValidSiteId}`;
     axiosMock.onGet(url).reply(200, dummyCommentList);
 
     const fetchButton = await ButtonTestkit({
@@ -54,7 +53,7 @@ describe('App', () => {
       dataHook: DataHooks.SITE_ID,
     });
 
-    await inputSiteId.enterText('1234');
+    await inputSiteId.enterText(dummyValidSiteId);
 
     await act(async () => {
       await fetchButton.click();
@@ -110,9 +109,53 @@ describe('App', () => {
       dataHook: DataHooks.TEXT,
     });
 
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
     await inputAuthor.enterText('Author Test');
     await inputText.enterText('Text Test');
+    await inputSiteId.enterText(dummyValidSiteId);
 
     expect(await addCommentButton.isButtonDisabled()).toEqual(false);
+  });
+
+  it('should clear comment form Add Comment success', async () => {
+    const { baseElement } = render(<App />);
+
+    const url = `/comments/${dummyValidSiteId}`;
+    axiosMock.onPost(url).reply(200, dummyComment);
+
+    const inputAuthor = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.AUTHOR,
+    });
+
+    const inputText = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.TEXT,
+    });
+
+    const addCommentButton = await ButtonTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.ADD_COMMENT,
+    });
+
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
+    await inputAuthor.enterText('Author Test');
+    await inputText.enterText('Text Test');
+    await inputSiteId.enterText(dummyValidSiteId);
+
+    await act(async () => {
+      await addCommentButton.click();
+    });
+
+    expect(await inputAuthor.getText()).toEqual('');
+    expect(await inputText.getText()).toEqual('');
   });
 });

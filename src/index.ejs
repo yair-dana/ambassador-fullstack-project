@@ -4,6 +4,7 @@
     <title><%= title %></title>
     <link type="image/png" href="https://www.wix.com/favicon.ico" rel="shortcut icon">
     <link rel="stylesheet" href="<%= baseStaticsUrl %>app<% if (!debug) { %>.min<% } %>.css">
+    <link rel="stylesheet" href="//static.parastorage.com/unpkg/@wix/wix-fonts@1.10.1/madefor.css">
 
     <!-- Run `npx add-sentry -p ambassador-fullstack -t [TEAM]` to add a valid Sentry link. More information at: https://github.com/wix-private/fed-infra/tree/master/add-sentry -->
 
@@ -24,6 +25,5 @@
     </script>
     <script src="<%= baseStaticsUrl %>app.bundle<% if (!debug) { %>.min<% } %>.js"></script>
     <!-- Please remove this template intro script tag -->
-    <script src="https://<%= staticsDomain %>/unpkg-semver/yoshi-template-intro/yoshi-template-intro.umd.js"></script>
   </body>
 </html>

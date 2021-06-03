@@ -19,12 +19,15 @@ import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import CommentForm from '../CommentForm/CommentForm';
 import CommentsList from '../CommentsList/CommentsList';
-import * as status from '../../requestStatus';
+import * as status from '../StatusMessage/requestStatus';
+import SiteIDCard from '../SiteIDCard/SiteIDCard';
+import StatusMessage from '../StatusMessage/StatusMessage';
 
 function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
     undefined,
   );
+
   const [siteId, setSiteId] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
   const [text, setText] = useState<string>('');
@@ -114,26 +117,16 @@ function App() {
             }
           />
           <Page.Content>
-            <Text
-              skin={requestStatus.skin}
-              textAlign="center"
-              dataHook={DataHooks.ERROR_MESSAGE}
-            >
-              {requestStatus.msg}
-            </Text>
             <Layout>
               <Cell>
-                <Card>
-                  <Card.Content>
-                    <FormField label="Please Provide Your Site ID" required>
-                      <Input
-                        value={siteId}
-                        onChange={HandleSiteIDChane}
-                        dataHook={DataHooks.SITE_ID}
-                      />
-                    </FormField>
-                  </Card.Content>
-                </Card>
+                <StatusMessage requestStatus={requestStatus} />
+              </Cell>
+
+              <Cell>
+                <SiteIDCard
+                  siteID={siteId}
+                  onSiteIDChange={HandleSiteIDChane}
+                />
               </Cell>
               <Cell span={6}>
                 <CommentForm
@@ -153,5 +146,4 @@ function App() {
     </WixStyleReactProvider>
   );
 }
-
 export default App;

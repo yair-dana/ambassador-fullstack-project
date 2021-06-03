@@ -2,24 +2,43 @@ const { bootstrapServer, emitConfigs } = require('./environment');
 
 import { AmbassadorTestkit } from '@wix/ambassador-testkit';
 import { NodeWorkshopScalaApp } from '@wix/ambassador-node-workshop-scala-app/rpc';
-
-const dummyCommentList = [
-  { author: 'author1', text: 'dummy comment' },
-  { author: 'author2', text: 'dummy comment' },
-  { author: 'author3', text: 'dummy comment' },
-];
+import {
+  dummyComment,
+  dummyCommentList,
+  dummyValidSiteId,
+  dummyInvalidSiteId,
+} from './__tests__/dummy-data-test';
 
 (async () => {
   const app = bootstrapServer();
   /** Start RPC Mocks **/
   const ambassadorTestkit = new AmbassadorTestkit();
-  const siteId = '1234';
+
+  /** Valid site id - Positive Scenarios test **/
+  ambassadorTestkit
+    .createStub(NodeWorkshopScalaApp)
+    .CommentsService()
+    .fetch.when(dummyValidSiteId)
+    .resolve(dummyCommentList);
 
   ambassadorTestkit
     .createStub(NodeWorkshopScalaApp)
     .CommentsService()
-    .fetch.when(siteId)
-    .resolve(dummyCommentList);
+    .add.when(dummyValidSiteId, dummyComment)
+    .resolve(dummyComment);
+
+  /** Invalid site id - Negative Scenarios test **/
+  ambassadorTestkit
+    .createStub(NodeWorkshopScalaApp)
+    .CommentsService()
+    .fetch.when(dummyInvalidSiteId)
+    .reject('Invalid Site ID');
+
+  ambassadorTestkit
+    .createStub(NodeWorkshopScalaApp)
+    .CommentsService()
+    .add.when(dummyInvalidSiteId, dummyComment)
+    .reject('Invalid Site ID');
 
   await ambassadorTestkit.start();
   /** End RPC Mocks **/

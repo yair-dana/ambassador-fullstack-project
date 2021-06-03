@@ -1,16 +1,10 @@
 import React, { Suspense } from 'react';
 import { render } from '@testing-library/react';
 import App from './App';
-import {
-  PageHeaderTestkit,
-  ButtonTestkit,
-  TextTestkit,
-  InputTestkit,
-} from 'wix-style-react/dist/testkit';
-import DataHooks from '../../DataHooks';
 import { act } from 'react-dom/test-utils';
 
 import { CommentToString } from '../../utils';
+import RTLAppDriver from './AppDriver';
 
 import {
   dummyValidSiteId,
@@ -24,180 +18,82 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
 const axiosMock = new MockAdapter(axios);
+let driver: RTLAppDriver;
 
 describe('App', () => {
-  it('renders a title correctly', async () => {
+  beforeEach(() => {
     const { baseElement } = render(<App />);
+    driver = new RTLAppDriver(baseElement);
+  });
 
-    const title = await PageHeaderTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.PAGE_HEADER,
-    });
-
-    expect(await title.titleText()).toEqual('Comments App');
+  it('renders a title correctly', async () => {
+    expect(await driver.get.pageTitleText()).toEqual('Comments App');
   });
 
   it('should render comments when user enter valid site id and click fetch', async () => {
-    const { baseElement } = render(<App />);
-
     const url = `/comments?siteId=${dummyValidSiteId}`;
     axiosMock.onGet(url).reply(200, dummyCommentList);
 
-    const fetchButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.FETCH_COMMENTS,
-    });
-
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
-
-    await inputSiteId.enterText(dummyValidSiteId);
+    await driver.when.enterSiteId(dummyValidSiteId);
 
     await act(async () => {
-      await fetchButton.click();
+      await driver.when.fetchButtonClick();
     });
 
-    const firstComment = await TextTestkit({
-      wrapper: baseElement,
-      dataHook: `${DataHooks.COMMENT}-0`,
-    });
-
-    expect(await firstComment.getText()).toEqual(
+    expect(await driver.get.commentTextByIndex('0')).toEqual(
       CommentToString(dummyCommentList[0].author, dummyCommentList[0].text),
     );
   });
 
   it('let user click fetch only if site id provide', async () => {
-    const { baseElement } = render(<App />);
+    await driver.when.enterSiteId('');
+    expect(await driver.is.fetchButtonDisable()).toEqual(true);
 
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
-
-    const fetchButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.FETCH_COMMENTS,
-    });
-
-    await inputSiteId.enterText('');
-    expect(await fetchButton.isButtonDisabled()).toEqual(true);
-
-    await inputSiteId.enterText('1234');
-    expect(await fetchButton.isButtonDisabled()).toEqual(false);
+    await driver.when.enterSiteId(dummyValidSiteId);
+    expect(await driver.is.fetchButtonDisable()).toEqual(false);
   });
 
   it('should allow user click Add comment only if required field entered', async () => {
-    const { baseElement } = render(<App />);
+    expect(await driver.is.addButtonDisable()).toEqual(true);
 
-    const addCommentButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.ADD_COMMENT,
-    });
+    await driver.when.enterCommentText('Text Test');
+    await driver.when.enterCommentAuthor('Author Test');
+    await driver.when.enterSiteId(dummyValidSiteId);
 
-    expect(await addCommentButton.isButtonDisabled()).toEqual(true);
-
-    const inputAuthor = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.AUTHOR,
-    });
-
-    const inputText = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.TEXT,
-    });
-
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
-
-    await inputAuthor.enterText('Author Test');
-    await inputText.enterText('Text Test');
-    await inputSiteId.enterText(dummyValidSiteId);
-
-    expect(await addCommentButton.isButtonDisabled()).toEqual(false);
+    expect(await driver.is.addButtonDisable()).toEqual(false);
   });
 
   it('should clear comment form Add Comment success', async () => {
-    const { baseElement } = render(<App />);
-
     const url = `/comments/${dummyValidSiteId}`;
     axiosMock.onPost(url).reply(200, dummyComment);
 
-    const inputAuthor = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.AUTHOR,
-    });
-
-    const inputText = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.TEXT,
-    });
-
-    const addCommentButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.ADD_COMMENT,
-    });
-
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
-
-    await inputAuthor.enterText('Author Test');
-    await inputText.enterText('Text Test');
-    await inputSiteId.enterText(dummyValidSiteId);
+    await driver.when.enterCommentText('Text Test');
+    await driver.when.enterCommentAuthor('Author Test');
+    await driver.when.enterSiteId(dummyValidSiteId);
 
     await act(async () => {
-      await addCommentButton.click();
+      await driver.when.addButtonClick();
     });
 
-    expect(await inputAuthor.getText()).toEqual('');
-    expect(await inputText.getText()).toEqual('');
+    expect(await driver.get.inputCommentText()).toEqual('');
+    expect(await driver.get.inputCommentAuthorText()).toEqual('');
   });
 
   it('should display error msg when user enter invalid site id and enter add comment', async () => {
-    const { baseElement } = render(<App />);
-
     const url = `/comments/${dummyInvalidSiteId}`;
     axiosMock.onPost(url).reply(404, dummyComment);
 
-    const inputText = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.TEXT,
-    });
-    const inputAuthor = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.AUTHOR,
-    });
-    const addCommentButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.ADD_COMMENT,
-    });
+    await driver.when.enterCommentText('Text Test');
+    await driver.when.enterCommentAuthor('Author Test');
+    await driver.when.enterSiteId(dummyInvalidSiteId);
 
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
+    expect(await driver.get.errorMessageText()).toEqual('');
 
-    const textErrorMessage = await TextTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.ERROR_MESSAGE,
-    });
-
-    await inputAuthor.enterText('Author Test');
-    await inputText.enterText('Text Test');
-    await inputSiteId.enterText(dummyInvalidSiteId);
-
-    expect(await textErrorMessage.getText()).toEqual('');
     await act(async () => {
-      await addCommentButton.click();
+      await driver.when.addButtonClick();
     });
 
-    expect(await textErrorMessage.getText()).toEqual(
+    expect(await driver.get.errorMessageText()).toEqual(
       'Error: Could Not Add Comments',
     );
   });
@@ -208,29 +104,14 @@ describe('App', () => {
     const url = `/comments?siteId=${dummyInvalidSiteId}`;
     axiosMock.onPost(url).reply(404, dummyComment);
 
-    const inputSiteId = await InputTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.SITE_ID,
-    });
+    await driver.when.enterSiteId(dummyInvalidSiteId);
 
-    const textErrorMessage = await TextTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.ERROR_MESSAGE,
-    });
-
-    const fetchButton = await ButtonTestkit({
-      wrapper: baseElement,
-      dataHook: DataHooks.FETCH_COMMENTS,
-    });
-
-    await inputSiteId.enterText(dummyInvalidSiteId);
-
-    expect(await textErrorMessage.getText()).toEqual('');
+    expect(await driver.get.errorMessageText()).toEqual('');
     await act(async () => {
-      await fetchButton.click();
+      await driver.when.fetchButtonClick();
     });
 
-    expect(await textErrorMessage.getText()).toEqual(
+    expect(await driver.get.errorMessageText()).toEqual(
       'Error: Could Not Fetch Comments',
     );
   });

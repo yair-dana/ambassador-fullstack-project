@@ -18,6 +18,7 @@ function ActiveBar(props: any) {
         <Button
           dataHook={DataHooks.FETCH_COMMENTS}
           onClick={props.onFetchComments}
+          disabled={!props.isFetchEnable}
         >
           Fetch Comments
         </Button>

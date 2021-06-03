@@ -5,6 +5,7 @@ import {
   PageHeaderTestkit,
   ButtonTestkit,
   TextTestkit,
+  InputTestkit,
 } from 'wix-style-react/dist/testkit';
 import DataHooks from '../../DataHooks';
 import { act } from 'react-dom/test-utils';
@@ -48,6 +49,13 @@ describe('App', () => {
       dataHook: DataHooks.FETCH_COMMENTS,
     });
 
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
+    await inputSiteId.enterText('1234');
+
     await act(async () => {
       await fetchButton.click();
     });
@@ -60,5 +68,25 @@ describe('App', () => {
     expect(await firstComment.getText()).toEqual(
       CommentToString(dummyCommentList[0].author, dummyCommentList[0].text),
     );
+  });
+
+  it('let user click fetch only if site id provide', async () => {
+    const { baseElement } = render(<App />);
+
+    const inputSiteId = await InputTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.SITE_ID,
+    });
+
+    const fetchButton = await ButtonTestkit({
+      wrapper: baseElement,
+      dataHook: DataHooks.FETCH_COMMENTS,
+    });
+
+    await inputSiteId.enterText('');
+    expect(await fetchButton.isButtonDisabled()).toEqual(true);
+
+    await inputSiteId.enterText('1234');
+    expect(await fetchButton.isButtonDisabled()).toEqual(false);
   });
 });

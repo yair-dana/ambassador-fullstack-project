@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Page,
   WixStyleReactProvider,
@@ -24,7 +24,11 @@ function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
     undefined,
   );
-  const [siteId, setSiteId] = useState('1234');
+  const [siteId, setSiteId] = useState<string>('');
+  const [commentAuthor, setCommentAuthor] = useState<string>('');
+  const [commentText, setCommentText] = useState<string>('');
+  const [isSiteIdValid, setIsSiteIdValid] = useState<boolean>(false);
+  const [isValidComment, SetIsValidComment] = useState<boolean>(false);
 
   const addComment = async (e: any) => {
     e.preventDefault();
@@ -32,10 +36,12 @@ function App() {
 
   const fetchComments = async (e: any) => {
     e.preventDefault();
-    const comments = await axios.get(`/comments?siteId=1234`);
+    const comments = await axios.get(`/comments?siteId=${siteId}`);
 
-    if (comments.status === 200) {
+    if (comments.status === 200 && comments.data !== '') {
       setCommentList(comments.data);
+    } else {
+      setCommentList(undefined);
     }
   };
 
@@ -43,6 +49,10 @@ function App() {
     { id: 1, value: 'Root Page' },
     { id: 2, value: 'Comments App' },
   ];
+
+  useEffect(() => {
+    setIsSiteIdValid(siteId.trim().length !== 0);
+  }, [siteId]);
 
   return (
     <WixStyleReactProvider features={{ reducedSpacingAndImprovedLayout: true }}>
@@ -54,6 +64,7 @@ function App() {
             breadcrumbs={<Breadcrumbs items={breadcrumbItems} activeId={2} />}
             actionsBar={
               <ActiveBar
+                isFetchEnable={isSiteIdValid}
                 onAddComment={addComment}
                 onFetchComments={fetchComments}
               />
@@ -87,6 +98,18 @@ function App() {
                   <Card.Divider />
                   <Card.Content>
                     <Layout>
+                      <Cell>
+                        <FormField label="Please Provide Your Site ID" required>
+                          <Input
+                            value={siteId}
+                            onChange={(e) => {
+                              setSiteId(e.target.value);
+                            }}
+                            dataHook={DataHooks.SITE_ID}
+                          />
+                        </FormField>
+                      </Cell>
+
                       {commentsList != undefined
                         ? commentsList?.map((comment, index) => {
                             return (

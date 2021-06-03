@@ -1,6 +1,7 @@
 import {
   PageHeaderTestkit,
   ButtonTestkit,
+  HeadingTestkit,
   TextTestkit,
   InputTestkit,
 } from 'wix-style-react/dist/testkit';
@@ -59,16 +60,24 @@ class RTLAppDriver {
       return inputAuthor.getText();
     },
     statusMessageText: async () => {
-      const textErrorMessage = await TextTestkit({
+      const textStatusMessage = await TextTestkit({
         wrapper: this.baseElement,
-        dataHook: DataHooks.ERROR_MESSAGE,
+        dataHook: DataHooks.STATUS_MESSAGE,
       });
-      return textErrorMessage.getText();
+      return textStatusMessage.getText();
+    },
+    fetchCommentsMessage: async () => {
+      const textResultMessage = await HeadingTestkit({
+        wrapper: this.baseElement,
+        dataHook: DataHooks.RESULT_MESSAGE,
+      });
+
+      return textResultMessage.getText();
     },
   };
 
   when = {
-    fetchButtonClick: async () => {
+    fetchCommentsButtonClick: async () => {
       const fetchButton = await ButtonTestkit({
         wrapper: this.baseElement,
         dataHook: DataHooks.FETCH_COMMENTS,

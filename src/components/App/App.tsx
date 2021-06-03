@@ -137,7 +137,7 @@ function App() {
                 />
               </Cell>
               <Cell span={6}>
-                <CommentsList comments={commentsList} />
+                <CommentsList comments={commentsList} status={requestStatus} />
               </Cell>
             </Layout>
           </Page.Content>

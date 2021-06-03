@@ -3,6 +3,7 @@ import {
   Cell,
   dateIndicationProps,
   FormField,
+  Heading,
   Input,
   Layout,
   Text,
@@ -11,9 +12,11 @@ import DataHooks from '../../DataHooks';
 import React from 'react';
 import { CommentToString } from '../../utils';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
+import { statusType } from '../StatusMessage/requestStatus';
 
 type CommentsListProps = {
   comments: Comment[] | undefined;
+  status: statusType;
 };
 
 export default function CommentsList(props: CommentsListProps) {
@@ -36,6 +39,14 @@ export default function CommentsList(props: CommentsListProps) {
                 </Cell>
               );
             })}
+
+          {props.comments === undefined && props.status.skin === 'success' && (
+            <Cell>
+              <Heading dataHook={DataHooks.RESULT_MESSAGE} appearance="H5">
+                Your site has no comments
+              </Heading>
+            </Cell>
+          )}
         </Layout>
       </Card.Content>
     </Card>

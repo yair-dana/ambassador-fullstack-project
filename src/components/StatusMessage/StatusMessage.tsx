@@ -12,7 +12,7 @@ export default function StatusMessage(props: statusProps) {
     <Text
       skin={props.requestStatus.skin}
       textAlign="center"
-      dataHook={DataHooks.ERROR_MESSAGE}
+      dataHook={DataHooks.STATUS_MESSAGE}
     >
       {props.requestStatus.msg}
     </Text>

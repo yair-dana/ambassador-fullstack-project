@@ -6,5 +6,6 @@ export default {
   SITE_ID: 'site-id-input',
   AUTHOR: 'author-input',
   TEXT: 'text-input',
-  ERROR_MESSAGE: 'error-message',
+  STATUS_MESSAGE: 'status-message',
+  RESULT_MESSAGE: 'result-message',
 };

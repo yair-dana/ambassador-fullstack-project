@@ -35,7 +35,7 @@ describe('App', () => {
     await driver.when.enterSiteId('site-valid-id');
 
     await act(async () => {
-      await driver.when.fetchButtonClick();
+      await driver.when.fetchCommentsButtonClick();
     });
 
     expect(await driver.get.commentTextByIndex('0')).toEqual(
@@ -104,7 +104,7 @@ describe('App', () => {
 
     expect(await driver.get.statusMessageText()).toEqual('');
     await act(async () => {
-      await driver.when.fetchButtonClick();
+      await driver.when.fetchCommentsButtonClick();
     });
 
     expect(await driver.get.statusMessageText()).toEqual(
@@ -119,7 +119,7 @@ describe('App', () => {
     await driver.when.enterSiteId('site-valid-id');
 
     await act(async () => {
-      await driver.when.fetchButtonClick();
+      await driver.when.fetchCommentsButtonClick();
     });
 
     expect(await driver.get.statusMessageText()).toEqual(
@@ -141,6 +141,20 @@ describe('App', () => {
 
     expect(await driver.get.statusMessageText()).toEqual(
       'Add A New Comment Successfully',
+    );
+  });
+
+  it('should render no data message if site id has no comments', async () => {
+    const url = `/comments?siteId=site-valid-id`;
+    axiosMock.onGet(url).reply(200);
+    await driver.when.enterSiteId('site-valid-id');
+
+    await act(async () => {
+      await driver.when.fetchCommentsButtonClick();
+    });
+
+    expect(await driver.get.fetchCommentsMessage()).toEqual(
+      'Your site has no comments',
     );
   });
 });

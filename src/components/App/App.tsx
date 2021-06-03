@@ -21,6 +21,7 @@ import * as events from 'events';
 import s from './App.scss';
 import { CommentToString } from '../../utils';
 import CommentForm from '../CommentForm/CommentForm';
+import CommentsList from '../CommentsList/CommentsList';
 
 function App() {
   const [commentsList, setCommentList] = useState<undefined | Comment[]>(
@@ -76,6 +77,10 @@ function App() {
     setAuthor(event.target.value);
   };
 
+  const HandleSiteIDChane = (event: ChangeEvent<HTMLInputElement>) => {
+    setSiteId(event.target.value);
+  };
+
   useEffect(() => {
     setIsSiteIdValid(siteId.trim().length !== 0);
     SetIsValidComment(
@@ -110,7 +115,6 @@ function App() {
             >
               {errorMsg}
             </Text>
-
             <Layout>
               <Cell span={6}>
                 <CommentForm
@@ -120,45 +124,12 @@ function App() {
                   onTextChange={HandleTextChange}
                 />
               </Cell>
-
               <Cell span={6}>
-                <Card>
-                  <Card.Header title="Comments List" />
-                  <Card.Divider />
-                  <Card.Content>
-                    <Layout>
-                      <Cell>
-                        <FormField label="Please Provide Your Site ID" required>
-                          <Input
-                            value={siteId}
-                            onChange={(e) => {
-                              setSiteId(e.target.value);
-                            }}
-                            dataHook={DataHooks.SITE_ID}
-                          />
-                        </FormField>
-                      </Cell>
-
-                      {commentsList != undefined
-                        ? commentsList?.map((comment, index) => {
-                            return (
-                              <Cell key={`cell-${index}`}>
-                                <Text
-                                  key={`text-${index}`}
-                                  dataHook={`${DataHooks.COMMENT}-${index}`}
-                                >
-                                  {CommentToString(
-                                    comment.author,
-                                    comment.text,
-                                  )}
-                                </Text>
-                              </Cell>
-                            );
-                          })
-                        : null}
-                    </Layout>
-                  </Card.Content>
-                </Card>
+                <CommentsList
+                  siteID={siteId}
+                  comments={commentsList}
+                  onSiteIdChange={HandleSiteIDChane}
+                />
               </Cell>
             </Layout>
           </Page.Content>

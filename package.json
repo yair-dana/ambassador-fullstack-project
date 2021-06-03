@@ -25,6 +25,7 @@
   "dependencies": {
     "@wix/ambassador": "^4.0.521",
     "@wix/ambassador-node-workshop-scala-app": "^1.0.12",
+    "@wix/ambassador-testkit": "^5.0.339",
     "@wix/bootstrap-hot-loader": "^5.0.0",
     "@wix/wix-axios-config": "latest",
     "@wix/wix-bootstrap-greyhound": "latest",
@@ -39,7 +40,8 @@
     "express": "^4.17.1",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "source-map-support": "^0.5.11"
+    "source-map-support": "^0.5.11",
+    "wix-style-react": "^9.120.0"
   },
   "devDependencies": {
     "@testing-library/react": "^11.2.5",
@@ -47,13 +49,13 @@
     "@types/node": "^14.0.0",
     "@types/react": "^16.7.20",
     "@types/react-dom": "^16.0.11",
-    "@wix/ambassador-testkit": "^5.0.339",
     "@wix/fedops-logger": "^5.0.0",
     "@wix/jest-yoshi-preset": "^5.0.0",
     "@wix/wix-bootstrap-testkit": "latest",
     "@wix/wix-config-emitter": "latest",
     "@wix/yoshi": "^5.0.0",
     "@wix/yoshi-style-dependencies": "^5.0.0",
+    "axios-mock-adapter": "^1.19.0",
     "husky": "~4.2.1",
     "lint-staged": "^10.0.7",
     "puppeteer": "^5.5.0",

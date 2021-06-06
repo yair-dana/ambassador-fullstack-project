@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Page,
@@ -8,10 +7,12 @@ import {
   Layout,
   FontUpgrade,
 } from 'wix-style-react';
+
 import DataHooks from '../../DataHooks';
 import { BreadcrumbsItem } from 'wix-style-react/dist/es/src/Breadcrumbs';
 import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 import * as status from '../StatusMessage/requestStatus';
+import { postComment, fetchCommentsList } from '../../services/client-api';
 import { isEmpty } from '../../utils';
 import ActiveBar from '../ActiveBar/ActiveBar';
 import CommentForm from '../CommentForm/CommentForm';
@@ -32,32 +33,35 @@ function App() {
     status.InitStatus,
   );
 
-  const addComment = async (e: any) => {
+  const addComment = async (e: MouseEvent) => {
     e.preventDefault();
-    const body = { author, text };
     setRequestStatus(status.LoadingStatus);
 
-    try {
-      await axios.post(`/comments/${siteId}`, body);
-      clearCommentForm();
-      setRequestStatus(status.SuccessStatus('Add A New Comment Successfully'));
-    } catch (err) {
-      setRequestStatus(status.ErrorStatus('Could Not Add Comment'));
-    }
+    await postComment(author, text, siteId)
+      .then((res) => {
+        clearCommentForm();
+        setRequestStatus(
+          status.SuccessStatus('Add A New Comment Successfully'),
+        );
+      })
+      .catch((err) => {
+        setRequestStatus(status.ErrorStatus('Could Not Add Comment'));
+      });
   };
 
-  const fetchComments = async (e: any) => {
+  const fetchComments = async (e: MouseEvent) => {
     e.preventDefault();
     setRequestStatus(status.LoadingStatus);
 
-    try {
-      const comments = await axios.get(`/comments?siteId=${siteId}`);
-      setRequestStatus(status.SuccessStatus('Fetch Comments Successfully'));
-      setCommentList(comments.data !== '' ? comments.data : undefined);
-    } catch (err) {
-      setCommentList(undefined);
-      setRequestStatus(status.ErrorStatus('Could Not Fetch Comments'));
-    }
+    await fetchCommentsList(siteId)
+      .then((res) => {
+        setCommentList(res.data !== '' ? res.data : undefined);
+        setRequestStatus(status.SuccessStatus('Fetch Comments Successfully'));
+      })
+      .catch((err) => {
+        setCommentList(undefined);
+        setRequestStatus(status.ErrorStatus('Could Not Fetch Comments'));
+      });
   };
 
   const clearCommentForm = () => {

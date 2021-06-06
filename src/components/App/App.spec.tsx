@@ -28,7 +28,7 @@ describe('App', () => {
     expect(await driver.get.pageTitleText()).toEqual('Comments App');
   });
 
-  it('should render comments when user enter valid site id and click fetch', async () => {
+  it('should render comments after user enter valid site id and click fetch', async () => {
     const url = `/comments?siteId=site-valid-id`;
     axiosMock.onGet(url).reply(200, dummyCommentList);
 
@@ -43,7 +43,7 @@ describe('App', () => {
     );
   });
 
-  it('let user click fetch only if site id provide', async () => {
+  it('should let user click fetch only when site id provided', async () => {
     await driver.when.enterSiteId('');
     expect(await driver.is.fetchButtonDisable()).toEqual(true);
 
@@ -61,7 +61,7 @@ describe('App', () => {
     expect(await driver.is.addButtonDisable()).toEqual(false);
   });
 
-  it('should clear comment form Add Comment success', async () => {
+  it('should clear comment form when Add Comment success', async () => {
     const url = `/comments/site-valid-id`;
     axiosMock.onPost(url).reply(200, dummyComment);
 
@@ -112,7 +112,7 @@ describe('App', () => {
     );
   });
 
-  it('should display success message when comments loaded', async () => {
+  it('should display success message when comments loaded correctly ', async () => {
     const url = `/comments?siteId=site-valid-id`;
     axiosMock.onGet(url).reply(200, dummyCommentList);
 

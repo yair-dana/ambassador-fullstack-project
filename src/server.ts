@@ -1,9 +1,13 @@
 import * as path from 'path';
 import { Router, Request } from 'express';
+import * as bodyParser from 'body-parser';
+
 import { hot } from '@wix/bootstrap-hot-loader';
 import wixExpressCsrf from '@wix/wix-express-csrf';
 import wixExpressRequireHttps from '@wix/wix-express-require-https';
 import * as WixNodeI18nCache from '@wix/wix-node-i18n-cache';
+import { addComments, fetchComments } from './services/comments-service';
+import { Comment } from '@wix/ambassador-node-workshop-scala-app/rpc';
 
 // caches translation files and serves them per request
 // https://github.com/wix-private/wix-node-i18n-cache
@@ -19,6 +23,8 @@ const localI18NCache = new WixNodeI18nCache({
 export default hot(module, (app: Router, context) => {
   // We load the already parsed ERB configuration (located at /templates folder).
   const config = context.config.load('ambassador-fullstack');
+
+  app.use(bodyParser.json({ limit: '200kb' }));
 
   // Attach CSRF protection middleware. See
   // https://github.com/wix-platform/wix-node-platform/tree/master/express/wix-express-csrf.
@@ -39,6 +45,60 @@ export default hot(module, (app: Router, context) => {
 
     // Send a response back to the client.
     res.renderView('./index.ejs', renderModel);
+  });
+
+  app.get('/comments', async (req, res) => {
+    const siteId = req.query.siteId;
+
+    if (!siteId) {
+      res.status(404).send({ error: 'site ID not found' });
+      return;
+    }
+    if (typeof siteId !== 'string') {
+      res.status(500).send({ error: 'Invalid site ID' });
+      return;
+    }
+
+    try {
+      const aspects = req.aspects;
+      const commentsList = await fetchComments(aspects, siteId);
+      res.send(commentsList);
+    } catch (err) {
+      res.status(500).send({ error: err.toString() });
+    }
+  });
+
+  app.post('/comments/:siteId', async (req, res) => {
+    const siteId = req.params.siteId;
+    const text = req.body.text;
+    const author = req.body.author;
+
+    if (!siteId || !text || !author) {
+      res
+        .status(404)
+        .send({ error: 'missing parameters- siteID | text | author' });
+      return;
+    }
+    if (
+      typeof siteId !== 'string' ||
+      typeof text !== 'string' ||
+      typeof author !== 'string'
+    ) {
+      res.status(500).send({ error: 'Invalid params' });
+      return;
+    }
+
+    try {
+      const aspects = req.aspects;
+      const comment: Comment = {
+        author: author as string,
+        text: text as string,
+      };
+      const ret = await addComments(aspects, siteId, comment);
+      res.send({ msg: 'Add a new comment successfully!', data: ret });
+    } catch (err) {
+      res.status(500).send({ error: err.toString() });
+    }
   });
 
   function getRenderModel(req: Request) {
